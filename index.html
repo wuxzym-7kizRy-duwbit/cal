@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новый Календарь</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Общий стиль страницы с темно-зеленым фоном */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #004d00; /* Темно-зеленый фон */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Контейнер для календаря */
+        .calendar {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 450px; /* Увеличиваем ширину календаря */
+            height: 500px; /* Увеличиваем высоту календаря */
+            background-image: url('images/background.jpg'); /* Путь к вашему изображению */
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Заголовок календаря с кнопками */
+        .calendar-header {
+            background-color: rgba(0, 0, 0, 0.6); /* Темный полупрозрачный фон для контраста */
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px; /* Увеличиваем отступы */
+        }
+
+        .calendar-header h2 {
+            margin: 0;
+            font-size: 26px; /* Увеличиваем размер шрифта */
+            font-weight: 500;
+        }
+
+        .calendar-header button {
+            background-color: transparent;
+            color: white;
+            border: none;
+            font-size: 22px; /* Увеличиваем размер кнопок */
+            cursor: pointer;
+        }
+
+        .calendar-header button:hover {
+            color: #f1f1f1;
+        }
+
+        /* Сетка дней недели */
+        .days-of-week {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: rgba(0, 0, 0, 0.4); /* Чуть темнее для контраста */
+            color: #fff;
+            padding: 15px 0; /* Увеличиваем отступы */
+        }
+
+        .days-of-week div {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px; /* Увеличиваем размер шрифта дней недели */
+        }
+
+        /* Сетка с числами дней */
+        .calendar-body {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 20px 0; /* Увеличиваем отступы */
+        }
+
+        .calendar-body div {
+            display: flex;
+            justify-content: flex-start; /* Сдвигаем содержимое влево */
+            align-items: center;
+            height: 60px; /* Увеличиваем высоту ячеек */
+            width: 60px; /* Увеличиваем ширину ячеек */
+            margin: 5px;
+            font-size: 22px; /* Увеличиваем размер шрифта */
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            color: white; /* Белый цвет для всех дней */
+        }
+
+        .calendar-body div:hover {
+            background-color: #c8e6c9;
+        }
+
+        .calendar-body .empty {
+            background-color: transparent;
+            pointer-events: none;
+        }
+
+        .calendar-body .today {
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar">
+        <div class="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <h2 id="month-year">Март 2024</h2>
+            <button id="next-month">&gt;</button>
+        </div>
+        <div class="days-of-week">
+            <div>Пн</div>
+            <div>Вт</div>
+            <div>Ср</div>
+            <div>Чт</div>
+            <div>Пт</div>
+            <div>Сб</div>
+            <div>Вс</div>
+        </div>
+        <div id="calendar-body" class="calendar-body"></div>
+    </div>
+
+    <script>
+        const monthNames = [
+            "январь", "февраль", "март", "апрель", "май", "июнь", 
+            "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
+        ];
+
+        let currentDate = new Date();
+
+        // Функция для рендеринга календаря
+        function renderCalendar() {
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+            
+            // Получаем первый день месяца с учетом, что понедельник - это 0
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Переводим воскресенье (0) в последнее место
+
+            const lastDateOfMonth = new Date(year, month + 1, 0).getDate(); // Получаем количество дней в месяце
+
+            // Обновляем заголовок
+            document.getElementById("month-year").innerText = `${monthNames[month]} ${year}`;
+
+            const calendarBody = document.getElementById("calendar-body");
+            calendarBody.innerHTML = '';
+
+            // Печатаем пустые ячейки до первого дня месяца
+            for (let i = 0; i < adjustedFirstDay; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.classList.add("empty");
+                calendarBody.appendChild(emptyCell);
+            }
+
+            // Печатаем дни месяца
+            for (let day = 1; day <= lastDateOfMonth; day++) {
+                const dayCell = document.createElement("div");
+                dayCell.innerText = day;
+                dayCell.classList.add("day");
+
+                // Выделяем текущий день
+                if (day === currentDate.getDate() && month === currentDate.getMonth()) {
+                    dayCell.classList.add("today");
+                }
+
+                calendarBody.appendChild(dayCell);
+            }
+        }
+
+        // Переход к следующему месяцу
+        document.getElementById("next-month").addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        // Переход к предыдущему месяцу
+        document.getElementById("prev-month").addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        // Инициализация календаря
+        renderCalendar();
+    </script>
+</body>
+</html>
